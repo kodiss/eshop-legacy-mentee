@@ -17,19 +17,21 @@ services:
       - POSTGRES_USER=eshop_user
       - POSTGRES_PASSWORD=password
     container_name: eshop_postgres
-  # backend:
-  #   depends_on:
-  #     - postgres
-  #   image: <<개인 Backend ECR URI>>:<<개인 Backend Image Tag>>
-  #   ports:
-  #     - "8090:8090"
-  #   environment:
-  #     - SPRING_DATASOURCE_URL=jdbc:postgresql://eshop_postgres:5432/eshop_db
-  #     - SPRING_REDIS_HOST=redis
-  # frontend:
-  #   depends_on:
-  #     - backend
-  #   image: <<개인 Frontend ECR URI>>:<<개인 Frontend Image Tag>>
-  #   ports:
-  #     - "8080:8080"
-  #   command: http-server dist --proxy http://backend:8090
+  backend:
+    depends_on:
+      - postgres
+    # image: eshop-backend:0.0.1-SNAPSHOT
+    image: eshopregistry-dklbuzel.scr.kr-west.samsungsdscloud.com/eshop-backend:0.0.1
+    ports:
+      - "8090:8090"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://eshop_postgres:5432/eshop_db
+      - SPRING_REDIS_HOST=redis
+  frontend:
+    depends_on:
+      - backend
+    # image: eshop-frontend:0.0.1
+    image: eshopregistry-dklbuzel.scr.kr-west.samsungsdscloud.com/eshop-frontend:0.0.1
+    ports:
+      - "8080:8080"
+    command: http-server dist --proxy http://backend:8090
