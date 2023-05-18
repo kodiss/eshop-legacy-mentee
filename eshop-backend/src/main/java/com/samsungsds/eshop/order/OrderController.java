@@ -1,5 +1,5 @@
 package com.samsungsds.eshop.order;
-
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Iterables;
@@ -31,17 +31,20 @@ public class OrderController {
     private final CartService cartService;
     private final PaymentService paymentService;
     private final ProductService productService;
+    private final RabbitTemplate rabbitTemplate;
 
     public OrderController(final OrderService orderService, 
     final ShippingService shippingService,
     final  PaymentService paymentService,
     final CartService cartService,
-    final ProductService productService) {
+    final ProductService productService,
+    final RabbitTemplate rabbitTemplate) {
         this.orderService = orderService;
         this.shippingService = shippingService;
         this.paymentService = paymentService;
         this.cartService = cartService;
         this.productService = productService;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @PostMapping(value = "/orders")
@@ -78,7 +81,11 @@ public class OrderController {
         String orderId = orderService.createOrderId(orderRequest);
 
         // 카트 비우기
-        cartService.emptyCart();
+        // cartService.emptyCart();
+
+        //이벤트 발행(추가)
+        rabbitTemplate.convertAndSend("eshop-exchange","order.placed", new OrderPlaced(orderId));
+
         return ResponseEntity.ok(new OrderResult(orderId, shippingResult.getShippingTrackingId(),
                 shippingResult.getShippingCost(), totalCost));
     }
