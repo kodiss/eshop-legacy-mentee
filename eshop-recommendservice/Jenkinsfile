@@ -22,7 +22,7 @@ pipeline {
       steps {
         script {
           container('kaniko') {
-            dir('eshop-frontend') {
+            dir('eshop-recommendservice') {
               def dockerAuth = sh(returnStdout: true, script: "echo -n \"${SCP_CREDS_USR}:${SCP_CREDS_PSW}\" | base64").trim().replaceAll(/\n/, '')            
               sh """
                 rm -rf /kaniko/.docker
